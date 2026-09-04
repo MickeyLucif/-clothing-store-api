@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-
 namespace App\Actions\Auth;
 
 use App\DTO\Auth\RegisterDataDto;
@@ -19,7 +18,7 @@ class RegisterUserAction
             ->where('name', RoleName::USER->value)
             ->firstOrFail();
 
-        $user = new User();
+        $user = new User;
         $user->name = $data->name;
         $user->email = $data->email;
         $user->password = $data->password;
@@ -27,6 +26,7 @@ class RegisterUserAction
         $user->save();
 
         event(new Registered($user));
+
         return $user;
     }
 }

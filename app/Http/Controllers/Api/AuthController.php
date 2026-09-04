@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Actions\Auth\RegisterUserAction;
 use App\DTO\Auth\RegisterDataDto;
+use App\Exceptions\EmailNotVerifiedException;
+use App\Exceptions\InvalidCredentialsException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
@@ -17,6 +19,7 @@ class AuthController extends Controller
     {
         $data = RegisterDataDto::from($request->validated());
         $user = $action($data);
+
         return new JsonResponse(
             data: UserResource::make($user),
             status: 201
@@ -24,28 +27,32 @@ class AuthController extends Controller
 
     }
 
-
     /**
      * Get a JWT via given credentials.
      *
-     * @return JsonResponse
+     * @throws EmailNotVerifiedException
+     * @throws InvalidCredentialsException
      */
     public function login(LoginRequest $request): JsonResponse
     {
         $credentials = $request->validated();
 
         if (! $token = auth('api')->attempt($credentials)) {
-            return response()->json(['error' => 'Unauthorized'], 401);
+            throw new InvalidCredentialsException;
+        }
+
+        $user = auth('api')->user();
+
+        if ($user instanceof User && ! $user->hasVerifiedEmail()) {
+            auth('api')->logout();
+            throw new EmailNotVerifiedException;
         }
 
         return $this->respondWithToken($token);
     }
 
-
     /**
      * Get the authenticated User.
-     *
-     * @return JsonResponse
      */
     public function user(): JsonResponse
     {
@@ -56,6 +63,7 @@ class AuthController extends Controller
                 data: ['error' => 'Unauthorized'],
                 status: 401);
         }
+
         return new JsonResponse(
             data: UserResource::make($user),
             status: 200
@@ -64,8 +72,6 @@ class AuthController extends Controller
 
     /**
      * Log the user out (Invalidate the token).
-     *
-     * @return JsonResponse
      */
     public function logout(): JsonResponse
     {
@@ -76,8 +82,6 @@ class AuthController extends Controller
 
     /**
      * Refresh a token.
-     *
-     * @return JsonResponse
      */
     public function refresh(): JsonResponse
     {
@@ -86,17 +90,13 @@ class AuthController extends Controller
 
     /**
      * Get the token array structure.
-     *
-     * @param  string $token
-     *
-     * @return JsonResponse
      */
     protected function respondWithToken(string $token): JsonResponse
     {
         return response()->json([
             'access_token' => $token,
             'token_type' => 'bearer',
-            'expires_in' => auth('api')->factory()->getTTL() * 60
+            'expires_in' => auth('api')->factory()->getTTL() * 60,
         ]);
     }
 }

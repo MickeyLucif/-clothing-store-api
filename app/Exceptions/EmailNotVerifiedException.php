@@ -5,13 +5,13 @@ namespace App\Exceptions;
 use App\Enum\Auth\AuthErrorCode;
 use Symfony\Component\HttpFoundation\Response;
 
-final class InvalidEmailVerificationLinkException extends ApiException
+final class EmailNotVerifiedException extends ApiException
 {
     public function __construct()
     {
         parent::__construct(
-            errorCode: AuthErrorCode::INVALID_EMAIL_VERIFICATION_LINK->value,
-            message: 'Invalid email verification link',
+            errorCode: AuthErrorCode::EMAIL_NOT_VERIFIED->value,
+            message: 'Email not verified',
             statusCode: Response::HTTP_FORBIDDEN,
         );
     }

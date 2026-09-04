@@ -1,12 +1,11 @@
 <?php
 
+use App\Exceptions\ApiException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
-use App\Exceptions\ApiException;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -20,8 +19,7 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
-            fn(Request $request, Throwable $exception): bool =>
-            $request->is('api/*') || $request->expectsJson()
+            fn (Request $request, Throwable $exception): bool => $request->is('api/*') || $request->expectsJson()
         );
         $exceptions->render(
             function (ApiException $exception): JsonResponse {
@@ -29,8 +27,8 @@ return Application::configure(basePath: dirname(__DIR__))
                     data: [
                         'error' => [
                             'code' => $exception->errorCode,
-                            'message' => $exception->getMessage()
-                        ]
+                            'message' => $exception->getMessage(),
+                        ],
                     ],
                     status: $exception->statusCode,
                 );
