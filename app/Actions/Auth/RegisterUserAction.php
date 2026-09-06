@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Auth;
 
 use App\DTO\Auth\RegisterDataDto;
-use App\Enum\RoleName;
+use App\Enum\Role as RoleEnum;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
@@ -15,7 +15,7 @@ class RegisterUserAction
     public function __invoke(RegisterDataDto $data): User
     {
         $role = Role::query()
-            ->where('name', RoleName::USER->value)
+            ->where('name', RoleEnum::CUSTOMER->value)
             ->firstOrFail();
 
         $user = new User;
