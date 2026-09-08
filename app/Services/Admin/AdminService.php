@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Admin;
 
 use App\Models\Admin;
-use Spatie\Permission\Contracts\Role;
+use App\Models\Role;
 
 class AdminService
 {
