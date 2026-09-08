@@ -1,13 +1,30 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Spatie\Permission\Models\Role as SpatieRole;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
-class Role extends SpatieRole
+class Role extends Model
 {
+    /** @var list<string> */
+    protected $fillable = [
+        'name',
+        'guard_name',
+    ];
+
+    public static function findOrCreate(string $name, string $guardName): self
+    {
+        return self::query()->firstOrCreate([
+            'name' => $name,
+            'guard_name' => $guardName,
+        ]);
+    }
+
     /** @return Collection<int, self> */
     public static function allForEveryGuard(): Collection
     {
@@ -29,8 +46,25 @@ class Role extends SpatieRole
             ->get();
     }
 
-    public function legacyUsers(): HasMany
+    public function permissions(): BelongsToMany
     {
-        return $this->hasMany(User::class);
+        return $this->belongsToMany(Permission::class, 'role_has_permissions');
+    }
+
+    /** @param Collection<int, Permission> $permissions */
+    public function syncPermissions(Collection $permissions): void
+    {
+        $this->permissions()->sync($permissions->modelKeys());
+        $this->unsetRelation('permissions');
+    }
+
+    public function users(): MorphToMany
+    {
+        return $this->morphedByMany(User::class, 'model', 'model_has_roles');
+    }
+
+    public function admins(): MorphToMany
+    {
+        return $this->morphedByMany(Admin::class, 'model', 'model_has_roles');
     }
 }

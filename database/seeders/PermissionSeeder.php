@@ -6,18 +6,28 @@ namespace Database\Seeders;
 
 use App\Enum\Guard;
 use App\Enum\Permission as PermissionEnum;
-use App\Models\Permission;
+use App\Services\PermissionService;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 
 class PermissionSeeder extends Seeder
 {
+    private const GUARD = Guard::ADMIN;
+
+    public function __construct(
+        private readonly PermissionService $permissionService,
+    ) {}
 
     public function run(): void
     {
-        DB::table('permissions')->truncate();
-        foreach (PermissionEnum::cases() as $permission) {
-            Permission::findOrCreate($permission->value, Guard::ADMIN->value);
-        }
+        $this->permissionService->syncForGuard($this->names(), self::GUARD);
+    }
+
+    /** @return list<string> */
+    private function names(): array
+    {
+        return array_map(
+            static fn (PermissionEnum $permission): string => $permission->value,
+            PermissionEnum::cases(),
+        );
     }
 }
