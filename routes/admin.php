@@ -2,17 +2,44 @@
 
 declare(strict_types=1);
 
-use App\Http\Controllers\Web\RoleController;
+use App\Enum\Permission as PermissionEnum;
+use App\Http\Controllers\Admin\Auth\AuthenticatedAccountController;
+use App\Http\Controllers\Admin\Auth\LoginController;
+use App\Http\Controllers\Admin\Auth\LogoutController;
+use App\Http\Controllers\Admin\Auth\RefreshTokenController;
+use App\Http\Controllers\Admin\Roles\IndexRoleController;
+use App\Http\Controllers\Admin\Roles\StoreRoleController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware('auth:admin')
-    ->prefix('admin')
+Route::prefix('admin')
     ->name('admin.')
     ->group(function (): void {
-        Route::view('/', 'dashboard')->name('dashboard');
+        Route::prefix('auth')
+            ->name('auth.')
+            ->group(function (): void {
+                Route::post('login', LoginController::class)->name('login');
 
+                Route::post('refresh', RefreshTokenController::class)
+                    ->middleware('throttle:30,1')
+                    ->name('refresh');
 
-        Route::group(['prefix' => 'roles', 'as' => 'roles.'], function () {
-            Route::get('/', [RoleController::class, 'index'])->name('index');
+                Route::middleware('auth:admin')->group(function (): void {
+                    Route::post('logout', LogoutController::class)->name('logout');
+                    Route::get('admin', AuthenticatedAccountController::class)->name('admin');
+                });
+            });
+
+        Route::middleware('auth:admin')->group(function (): void {
+            Route::prefix('roles')
+                ->name('roles.')
+                ->group(function (): void {
+                    Route::get('/', IndexRoleController::class)
+                        ->middleware('can:'.PermissionEnum::VIEW_ROLES->value)
+                        ->name('index');
+
+                    Route::post('/', StoreRoleController::class)
+                        ->middleware('can:'.PermissionEnum::CREATE_ROLES->value)
+                        ->name('store');
+                });
         });
     });
