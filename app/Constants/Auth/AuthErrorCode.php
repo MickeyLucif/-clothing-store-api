@@ -1,0 +1,26 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Constants\Auth;
+
+final class AuthErrorCode
+{
+    public const INVALID_EMAIL_VERIFICATION_LINK = 'INVALID_EMAIL_VERIFICATION_LINK';
+
+    public const EMAIL_VERIFICATION_USER_NOT_FOUND = 'EMAIL_VERIFICATION_USER_NOT_FOUND';
+
+    public const EMAIL_NOT_VERIFIED = 'EMAIL_NOT_VERIFIED';
+
+    public const INVALID_CREDENTIALS = 'INVALID_CREDENTIALS';
+
+    public const TOO_MANY_LOGIN_ATTEMPTS = 'TOO_MANY_LOGIN_ATTEMPTS';
+
+    public const UNAUTHENTICATED = 'UNAUTHENTICATED';
+
+    public const AUTHENTICATED_ACCOUNT_UNAVAILABLE = 'AUTHENTICATED_ACCOUNT_UNAVAILABLE';
+
+    public const EMAIL_VERIFICATION_FAILED = 'EMAIL_VERIFICATION_FAILED';
+
+    private function __construct() {}
+}
