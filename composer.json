@@ -11,7 +11,6 @@
         "laravel/tinker": "^2.10.1",
         "spatie/data-transfer-object": "^3.9",
         "spatie/laravel-data": "^4.23",
-        "spatie/laravel-permission": "^8.3",
         "tymon/jwt-auth": "^2.3"
     },
     "require-dev": {
